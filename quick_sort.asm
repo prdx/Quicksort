@@ -84,6 +84,39 @@ main:
   li $a0, 0   # Return 0
   syscall
 
+# int str_lt (const char *x, const char *y)
+str_lt:
+  move $t0, $a0 # Transfer the x from a0 to t0
+  move $t1, $a1 # Transfer the y from a1 to t1
+
+  # for (; *x!='\0' && *y!='\0'; x++, y++) {
+  compare_loop:
+    bne     $t0, $zero, end_compare_loop
+    bne     $t1, $zero, end_compare_loop
+
+    # if ( *x < *y ) return 1
+    ble     $t0, $t1, return_1
+    # if ( *y < *x ) return 0
+    ble     $t1, $t0, return_0
+
+    addi    $t0, $t0, 1
+    addi    $t1, $t1, 1
+
+  end_compare_loop:
+    # if ( *y == '\0' ) return 0;
+    beq     $t1, $zero, return_0
+    # else return 1;
+    beq     $t0, $zero, return_1
+
+  return_1:
+    li $v0, 1
+    jr $ra
+
+  return_0:
+    li $v0, 0
+    jr $ra
+
+
 # void print_array(const char * a[], const int size)
 print_array:
   move $t0, $a0 # Transfer the array to another register
@@ -98,7 +131,7 @@ print_array:
   li $t2, 0
 
   print_loop:
-    beq     $t2, $t1, end_loop # If t2 == size end loop
+    beq     $t2, $t1, end_print_loop # If t2 == size end loop
 
     # printf(" %s", a[i]);
     la $a0, space
@@ -115,7 +148,7 @@ print_array:
     j print_loop # Repeat
   
 
-  end_loop:    
+  end_print_loop:    
     # printf(" ]\n");
     li    $v0, 4
     la    $a0, close_bracket
