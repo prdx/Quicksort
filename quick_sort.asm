@@ -14,8 +14,8 @@
       #                 "Jeff", "Joyce", "Jerry", "Janice",
       #                 "Jake", "Jonna", "Jack", "Jocelyn",
       #                 "Jessie", "Jess", "Janet", "Jane"};
-      names:
         .align 5
+      dataNames:
         .asciiz "Joe" 
         .align 5
         .asciiz "Jenny"
@@ -48,6 +48,10 @@
         .align 5
         .asciiz "Jane"
         .align 5
+      
+                   .align 2
+      dataAddress: .space 64
+
         		
 	# int size = 16;
 	size: 		.word 16
@@ -67,16 +71,35 @@ main:
   la    $a0, initial_array
   syscall
 
+  # Build the array of address
+  la    $t0, dataAddress
+  la    $t1, dataNames
+  li    $t2, 0
+  li 	$t3, 16
+
+
+  build_address:
+  beq $t2, $t3, end_build_address
+  sw $t1, ($t0)
+  addi $t0, $t0, 4
+  addi $t1, $t1, 32
+  addi $t2, $t2, 1
+  
+  j build_address
+
+  end_build_address:
+
   # print_array(data, size);
-  la $a0, names
+  la $a0, dataAddress
   la    $a1, size
   lw    $a1, 0($a1)
+   
   
-  addi $sp, $sp, -4
+  addi $sp, $sp, -4 # Use stack
   sw $ra, 0($sp)
   jal print_array
   lw $ra, 0($sp)
-  addi $sp, $sp, 4
+  addi $sp, $sp, 4 # Return stack
 
 
   # exit(0)
@@ -137,13 +160,15 @@ print_array:
     la $a0, space
     li $v0, 4
     syscall
+    
 
-    move $a0, $t0
+    la $a0, ($t0)
+    lw $a0, ($a0) # Store the value of the pointed address
     li $v0, 4
     syscall
 
     addi    $t2, $t2, 1 # i++
-    addi    $t0, $t0, 32 # Advance the array pointer
+    addi    $t0, $t0, 4 # Advance the array pointer
 
     j print_loop # Repeat
   
