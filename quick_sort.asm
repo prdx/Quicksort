@@ -116,12 +116,12 @@ main:
   lw $ra, 0($sp)
   addi $sp, $sp, 4 # Return stack
 
-
   # exit(0)
   li $v0, 10  # System call exit
   li $a0, 0   # Return 0
   syscall
 
+# -----------------------------------------------------------------
 # int str_lt (const char *x, const char *y)
 str_lt:
   move $t0, $a0 # Transfer the x from a0 to t0
@@ -161,7 +161,7 @@ str_lt:
     li $v0, 0
     jr $ra
 
-
+# -----------------------------------------------------------------
 # void swap_str_ptrs(const char **s1, const char **s2)
 swap_str_ptrs:
   la $t1, ($a0) # Store a0 in the temporary register
@@ -181,25 +181,76 @@ swap_str_ptrs:
   
   li $v0, 0
   jr $ra
-  
+
+# -----------------------------------------------------------------
 # void quick_sort(const char *a[], size_t len) {
 quick_sort:
-  move $t0, $a0 # Transfer arrayAddress to t0 register
-  move $t1, $a1 # Transfer size to t1 register
-  addi $t2, 1   # Magic number 1
+  # Prepare stack
+  subu $sp, $sp, 16
+  sw $s0, ($sp)
+  sw $s1, 4($sp)
+  sw $s3, 8($sp)
+  
+  move $s0, $a0 # Transfer arrayAddress to t0 register
+  move $s1, $a1 # Transfer size to t1 register
 
   # if (len <= 1) return;
-  ble $t1, $t2, return_quick_sort
+  ble $s1, 1, return_quick_sort
 
-  # int pivot = 1; 
-  addi $t3, 0
+  # int pivot = 0; 
+  addi $s3, 0
+  
+  # TODO: For function here
+  # for (int i = 0; i < len - 1; i++) {
+  li $t0, 0             # i = 0
+  subu $t1, $s1, 1      # len - 1
 
-  addi $t4, 0
+  quick_sort_loop:
+    ble $t0, $t1, quick_sort_loop_end       # i < len - 1
+    # TODO: Call the str_lt function
+    # TODO: If return 1 swap and increase pivot
+    addi $t0, 1
+    j quick_sort_loop
+
+
+  quick_sort_loop_end:
+  # swap_str_ptrs(&a[pivot], &a[len - 1]);
+  li $t0, 4             # Put constant in a register
+  multu $s3, $t0        # Multiple pivot * 4
+  mflo $s4              # Store pivot * 4 in t1
+  subu $s5, $a1, 1      # len - 1 
+  multu $s5, $t0        # Multiple len - 1 * 4
+  mflo $s5              # Store (len - 1) * 4 in t2
+  addi $a0, $s0, $s4    # Advance the pointer of s0 + pivot * 4
+  addi $a1, $s0, $s5    # Advance the pointer of s0 + (len - 1) * 4
+
+  addi $sp, $sp, -4     # Use stack
+  sw $ra, 0($sp)
+  jal swap_str_ptrs
+  lw $ra, 0($sp)
+  addi $sp, $sp, 4      # Return stack
+
+  # quick_sort(a, pivot);
+  move $a0, $s0         # Restore a0 with the initial array
+  move $a1, $s3         # Transfer pivot as parameter
+  jal quick_sort
+
+  # quick_sort(a + pivot + 1, len - pivot - 1);
+  addu $a0, $s0, $s3 # a + pivot
+  addu $a0, $a0, 1   # a + pivot + 1
+  subu $a1, $s3, $s1 # len - pivot
+  subu $a1, $a1, 1   # len - pivot - 1
+  jal quick_sort
 
   return_quick_sort:
+    lw $s0, ($sp)
+    lw $s1, 4($sp)
+    lw $s3, 8($sp)
+    addu $sp, 16
     li $v0, 0
     jr $ra
 
+# -----------------------------------------------------------------
 # void print_array(const char * a[], const int size)
 print_array:
   move $t0, $a0 # Transfer the array to another register
