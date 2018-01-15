@@ -164,7 +164,7 @@ str_lt:
 # -----------------------------------------------------------------
 # void swap_str_ptrs(const char **s1, const char **s2)
 swap_str_ptrs:
-  la $t1, ($a0) # Store a0 in the temporary register
+  la $t1, ($a0)         # Store a0 in the temporary register
   lw $t1, ($t1)
   
   # const char *tmp = *s1;
@@ -172,12 +172,12 @@ swap_str_ptrs:
   lw $t0, ($t0)
  
   # *s1 = *s2;
-  la $t2, ($a1) # Store a1 in the temporary register t2
+  la $t2, ($a1)         # Store a1 in the temporary register t2
   lw $t2, ($t2)
-  sw $t2, ($a0) # and then replace t1 by the content of t2
+  sw $t2, ($a0)         # and then replace t1 by the content of t2
 
   # *s2 = tmp;
-  sw $t0, ($a1) # Replace t2 by the initial content of t1
+  sw $t0, ($a1)         # Replace t2 by the initial content of t1
   
   li $v0, 0
   jr $ra
@@ -191,8 +191,8 @@ quick_sort:
   sw $s1, 4($sp)
   sw $s3, 8($sp)
   
-  move $s0, $a0 # Transfer arrayAddress to t0 register
-  move $s1, $a1 # Transfer size to t1 register
+  move $s0, $a0         # Transfer arrayAddress to t0 register
+  move $s1, $a1         # Transfer size to t1 register
 
   # if (len <= 1) return;
   ble $s1, 1, return_quick_sort
@@ -236,10 +236,10 @@ quick_sort:
   jal quick_sort
 
   # quick_sort(a + pivot + 1, len - pivot - 1);
-  addu $a0, $s0, $s3 # a + pivot
-  addu $a0, $a0, 1   # a + pivot + 1
-  subu $a1, $s3, $s1 # len - pivot
-  subu $a1, $a1, 1   # len - pivot - 1
+  addu $a0, $s0, $s3    # a + pivot
+  addu $a0, $a0, 1      # a + pivot + 1
+  subu $a1, $s3, $s1    # len - pivot
+  subu $a1, $a1, 1      # len - pivot - 1
   jal quick_sort
 
   return_quick_sort:
@@ -253,8 +253,8 @@ quick_sort:
 # -----------------------------------------------------------------
 # void print_array(const char * a[], const int size)
 print_array:
-  move $t0, $a0 # Transfer the array to another register
-  move $t1, $a1 # Transfer the array size to another register 
+  move $t0, $a0     # Transfer the array to another register
+  move $t1, $a1     # Transfer the array size to another register 
 
   # printf("[")
   li    $v0, 4
@@ -274,14 +274,14 @@ print_array:
     
 
     la $a0, ($t0)
-    lw $a0, ($a0) # Store the value of the pointed address
+    lw $a0, ($a0)       # Store the value of the pointed address
     li $v0, 4
     syscall
 
     addi    $t2, $t2, 1 # i++
     addi    $t0, $t0, 4 # Advance the array pointer
 
-    j print_loop # Repeat
+    j print_loop        # Repeat
   
 
   end_print_loop:    
