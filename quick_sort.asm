@@ -1,10 +1,13 @@
 ## Anak Agung Ngurah Bagus Trihatmaja -- Jan 11 2018
-## quicksort.asm -- a program to sort array using quick sort algorithm
+## quick_sort.asm -- a program to sort array using quick sort algorithm
 ##
-## Registers used:
+## Input array:
+## [ Joe Jenny Jill John Jeff Joyce Jerry Janice Jake Jonna Jack Jocelyn 
+##   Jessie Jess Janet Jane ]
 ##
-##
-##
+## Output array:
+## [ Jack Jake Jane Janet Janice Jeff Jenny Jerry Jess Jessie Jill 
+##   Jocelyn Joe John Jonna Joyce ]
 ##
 
 .globl main
@@ -179,6 +182,24 @@ swap_str_ptrs:
   li $v0, 0
   jr $ra
   
+# void quick_sort(const char *a[], size_t len) {
+quick_sort:
+  move $t0, $a0 # Transfer arrayAddress to t0 register
+  move $t1, $a1 # Transfer size to t1 register
+  addi $t2, 1   # Magic number 1
+
+  # if (len <= 1) return;
+  ble $t1, $t2, return_quick_sort
+
+  # int pivot = 1; 
+  addi $t3, 0
+
+  addi $t4, 0
+
+  return_quick_sort:
+    li $v0, 0
+    jr $ra
+
 # void print_array(const char * a[], const int size)
 print_array:
   move $t0, $a0 # Transfer the array to another register
