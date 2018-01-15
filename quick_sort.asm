@@ -93,7 +93,6 @@ main:
   la $a0, dataAddress
   la    $a1, size
   lw    $a1, 0($a1)
-   
   
   addi $sp, $sp, -4 # Use stack
   sw $ra, 0($sp)
@@ -111,19 +110,26 @@ main:
 str_lt:
   move $t0, $a0 # Transfer the x from a0 to t0
   move $t1, $a1 # Transfer the y from a1 to t1
+  
 
   # for (; *x!='\0' && *y!='\0'; x++, y++) {
   compare_loop:
-    bne     $t0, $zero, end_compare_loop
-    bne     $t1, $zero, end_compare_loop
-
+    lb $t3, ($t0)
+    lb $t4, ($t1)
+    
+    beq     $t3, $zero, end_compare_loop
+    beq     $t4, $zero, end_compare_loop
+    
+    
     # if ( *x < *y ) return 1
-    ble     $t0, $t1, return_1
+    blt     $t3, $t4, return_1
     # if ( *y < *x ) return 0
-    ble     $t1, $t0, return_0
+    blt     $t4, $t3, return_0
 
     addi    $t0, $t0, 1
     addi    $t1, $t1, 1
+    
+    j compare_loop
 
   end_compare_loop:
     # if ( *y == '\0' ) return 0;
