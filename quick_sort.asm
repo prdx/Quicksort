@@ -89,11 +89,24 @@ main:
 
   end_build_address:
 
+  ## DEBUG 
+  # Prepare for swap function test
+  # la $a0, dataAddress
+  # addi $a0, $a0, 4
+  # la    $a1, 4($a0)
+  
+  # Test the swap fuction
+  # addi $sp, $sp, -4 # Use stack
+  # sw $ra, 0($sp)
+  # jal swap_str_ptrs
+  # lw $ra, 0($sp)
+  # addi $sp, $sp, 4 # Return stack
+
   # print_array(data, size);
   la $a0, dataAddress
   la    $a1, size
   lw    $a1, 0($a1)
-  
+
   addi $sp, $sp, -4 # Use stack
   sw $ra, 0($sp)
   jal print_array
@@ -146,6 +159,26 @@ str_lt:
     jr $ra
 
 
+# void swap_str_ptrs(const char **s1, const char **s2)
+swap_str_ptrs:
+  la $t1, ($a0) # Store a0 in the temporary register
+  lw $t1, ($t1)
+  
+  # const char *tmp = *s1;
+  la $t0, ($a0)
+  lw $t0, ($t0)
+ 
+  # *s1 = *s2;
+  la $t2, ($a1) # Store a1 in the temporary register t2
+  lw $t2, ($t2)
+  sw $t2, ($a0) # and then replace t1 by the content of t2
+
+  # *s2 = tmp;
+  sw $t0, ($a1) # Replace t2 by the initial content of t1
+  
+  li $v0, 0
+  jr $ra
+  
 # void print_array(const char * a[], const int size)
 print_array:
   move $t0, $a0 # Transfer the array to another register
