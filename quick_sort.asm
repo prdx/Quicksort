@@ -96,23 +96,13 @@ main:
   la $a0, dataAddress       # Load the data as parameter
   la $a1, size              
   lw $a1, 0($a1)
-
-  addi $sp, $sp, -4 # Use stack
-  sw $ra, 0($sp)
   jal print_array
-  lw $ra, 0($sp)
-  addi $sp, $sp, 4 # Return stack
 
   # quick_sort(data, size)
   la $a0, dataAddress       # Load the data as parameter
   la $a1, size
   lw $a1, 0($a1)
-  
-  addi $sp, $sp, -4 # Use stack
-  sw $ra, 0($sp)
   jal quick_sort
-  lw $ra, 0($sp)
-  addi $sp, $sp, 4 # Return stack
 
   # printf("Sorted array:\n")
   li $v0, 4
@@ -123,12 +113,7 @@ main:
   la $a0, dataAddress       # Load the data as parameter
   la $a1, size
   lw $a1, 0($a1)
-  
-  addi $sp, $sp, -4 # Use stack
-  sw $ra, 0($sp)
   jal print_array
-  lw $ra, 0($sp)
-  addi $sp, $sp, 4 # Return stack
 
   # exit(0)
   li $v0, 10  # System call exit
@@ -138,6 +123,9 @@ main:
 # -----------------------------------------------------------------
 # int str_lt (const char *x, const char *y)
 str_lt:
+  addi $sp, $sp, -4 # Use stack
+  sw $ra, 0($sp)
+
   lw $t0, ($a0) # Transfer the x from a0 to t0
   lw $t1, ($a1) # Transfer the y from a1 to t1
   
@@ -167,15 +155,22 @@ str_lt:
 
   return_1:
     li $v0, 1
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4 # Return stack
     jr $ra
 
   return_0:
     li $v0, 0
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4 # Return stack
     jr $ra
 
 # -----------------------------------------------------------------
 # void swap_str_ptrs(const char **s1, const char **s2)
 swap_str_ptrs:
+  addi $sp, $sp, -4 # Use stack
+  sw $ra, 0($sp)
+
   la $t1, ($a0)         # Store a0 in the temporary register
   lw $t1, ($t1)
   
@@ -191,7 +186,8 @@ swap_str_ptrs:
   # *s2 = tmp;
   sw $t0, ($a1)         # Replace t2 by the initial content of t1
   
-  li $v0, 0
+  lw $ra, 0($sp)
+  addi $sp, $sp, 4 # Return stack
   jr $ra
 
 # -----------------------------------------------------------------
@@ -228,12 +224,7 @@ quick_sort:
     mflo $t2            # Store (len - 1) * 4 to $t2
     add $a0, $s0, $t1   # Advance the pointer
     add $a1, $s0, $t2   # Advance the pointer
-
-    addi $sp, $sp, -4     # Use stack
-    sw $ra, 0($sp)
     jal str_lt 
-    lw $ra, 0($sp)
-    addi $sp, $sp, 4      # Return stack
 
     beq $v0, 1, do_swap   # str_lt(&a[i], &a[len-1]) == 1
 
@@ -241,6 +232,7 @@ quick_sort:
     j quick_sort_loop
 
     do_swap:
+      # swap_str_ptrs(&a[i], &a[pivot]);
       li $t0, 4
       multu $s4, $t0      # i * 4
       mflo $t1            # Store the i * 4 to $t1
@@ -248,13 +240,7 @@ quick_sort:
       mflo $t2            # Store pivot * 4 to $t2
       add $a0, $s0, $t1   # Advance the pointer
       add $a1, $s0, $t2   # Advance the pointer
-      
-      # swap_str_ptrs(&a[i], &a[pivot]);
-      addi $sp, $sp, -4     # Use stack
-      sw $ra, 0($sp)
       jal swap_str_ptrs
-      lw $ra, 0($sp)
-      addi $sp, $sp, 4      # Return stack
       
       # pivot++;
       addi $s3, $s3, 1
@@ -272,12 +258,7 @@ quick_sort:
   mflo $s5              # Store (len - 1) * 4 in t2
   add $a0, $s0, $s4     # Advance the pointer of s0 + pivot * 4
   add $a1, $s0, $s5     # Advance the pointer of s0 + (len - 1) * 4
-
-  addi $sp, $sp, -4     # Use stack
-  sw $ra, 0($sp)
   jal swap_str_ptrs
-  lw $ra, 0($sp)
-  addi $sp, $sp, 4      # Return stack
 
   # quick_sort(a, pivot);
   move $a0, $s0         # Restore a0 with the initial array
@@ -292,7 +273,6 @@ quick_sort:
   add $a0, $s0, $s4     # a + (pivot + 1) * 4
   sub $a1, $s1, $s3     # len - pivot
   sub $a1, $a1, 1       # len - pivot - 1
-  
   jal quick_sort 
   
   lw $ra, ($sp)
@@ -313,6 +293,9 @@ quick_sort:
 # -----------------------------------------------------------------
 # void print_array(const char * a[], const int size)
 print_array:
+  addi $sp, $sp, -4 # Use stack
+  sw $ra, 0($sp)
+
   move $t0, $a0     # Transfer the array to another register
   move $t1, $a1     # Transfer the array size to another register 
 
@@ -348,5 +331,6 @@ print_array:
     la    $a0, close_bracket
     syscall
 
-    li $v0, 0
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4 # Return stack
     jr $ra
