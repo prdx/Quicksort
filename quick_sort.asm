@@ -25,39 +25,39 @@
         .align 5
         .asciiz "Jill"
         .align 5
-        #asciiz "John"
-        #align 5
-        #asciiz "Jeff"
-        #align 5
-        #asciiz "Joyce"
-        #align 5
-        #asciiz "Jerry"
-        #align 5
-        #asciiz "Janice"
-        #align 5
-        #asciiz "Jake"
-        #align 5
-        #asciiz "Jonna"
-        #align 5
-        #asciiz "Jack"
-        #align 5
-        #asciiz "Jocelyn"
-        #align 5
-        #asciiz "Jessie"
-        #align 5
-        #asciiz "Jess"
-        #align 5
-        #asciiz "Janet"
-        #align 5
-        #asciiz "Jane"
-        #align 5
+        .asciiz "John"
+        .align 5
+        .asciiz "Jeff"
+        .align 5
+        .asciiz "Joyce"
+        .align 5
+        .asciiz "Jerry"
+        .align 5
+        .asciiz "Janice"
+        .align 5
+        .asciiz "Jake"
+        .align 5
+        .asciiz "Jonna"
+        .align 5
+        .asciiz "Jack"
+        .align 5
+        .asciiz "Jocelyn"
+        .align 5
+        .asciiz "Jessie"
+        .align 5
+        .asciiz "Jess"
+        .align 5
+        .asciiz "Janet"
+        .align 5
+        .asciiz "Jane"
+        .align 5
       
                    .align 2
       dataAddress: .space 64
 
         		
 	# int size = 16;
-	size: 		.word 3
+	size: 		.word 16
 
     initial_array:      .asciiz "Initial array:\n"
     sorted_array:       .asciiz "Sorted array:\n"
@@ -95,9 +95,15 @@ main:
 
   ## DEBUG 
   # Prepare for swap function test
-  # la $a0, dataAddress
+  la $a0, dataAddress
   # addi $a0, $a0, 4
-  # la    $a1, 4($a0)
+  la    $a1, ($a0)
+  
+  addi $sp, $sp, -4     # Use stack
+    sw $ra, 0($sp)
+    jal str_lt 
+    lw $ra, 0($sp)
+    addi $sp, $sp, 4 
   
   # Test the swap fuction
   # addi $sp, $sp, -4 # Use stack
@@ -130,7 +136,7 @@ main:
 
   # printf("Sorted array:\n")
   li    $v0, 4
-  la    $a0, initial_array
+  la    $a0, sorted_array
   syscall
   
   # print_array(data, size);
@@ -152,34 +158,33 @@ main:
 # -----------------------------------------------------------------
 # int str_lt (const char *x, const char *y)
 str_lt:
-  move $t0, $a0 # Transfer the x from a0 to t0
-  move $t1, $a1 # Transfer the y from a1 to t1
+  lw $t0, ($a0) # Transfer the x from a0 to t0
+  lw $t1, ($a1) # Transfer the y from a1 to t1
   
 
-  # for (#*x!='\0' && *y!='\0'; x++, y++) {
+  # for (; *x!='\0' && *y!='\0'; x++, y++) {
   compare_loop:
     lb $t3, ($t0)
-    lb $t4, ($t1)
+    lb $t4, ($t1)       
     
     beq     $t3, $zero, end_compare_loop
     beq     $t4, $zero, end_compare_loop
-    
-    
+       
     # if ( *x < *y ) return 1
     blt     $t3, $t4, return_1
     # if ( *y < *x ) return 0
     blt     $t4, $t3, return_0
 
-    addi    $t0, $t0, 1
-    addi    $t1, $t1, 1
+    addi    $t0, $t0, 1     #x++ 
+    addi    $t1, $t1, 1     #y++
     
     j compare_loop
 
   end_compare_loop:
     # if ( *y == '\0' ) return 0;
-    beq     $t1, $zero, return_0
+    beq     $t4, $zero, return_0
     # else return 1;
-    beq     $t0, $zero, return_1
+    beq     $t3, $zero, return_1
 
   return_1:
     li $v0, 1
@@ -234,7 +239,7 @@ quick_sort:
   subu $s5, $s1, 1      # len - 1
 
   quick_sort_loop:
-    ble $s4, $s5, quick_sort_loop_end       # if i >= len - 1, end loop
+    bgt $s4, $s5, quick_sort_loop_end       # if i >= len - 1, end loop
 
     # if (str_lt(a[i], a[len - 1])) {
     li $t0, 4
@@ -251,7 +256,7 @@ quick_sort:
     lw $ra, 0($sp)
     addi $sp, $sp, 4      # Return stack
 
-    beq $v0, 1, do_swap     # str_lt(&a[i], &a[len-1]) == 1
+    beq $v0, 1, do_swap   # str_lt(&a[i], &a[len-1]) == 1
 
     addi $s4, $s4, 1      # i++
     j quick_sort_loop
@@ -260,8 +265,8 @@ quick_sort:
       li $t0, 4
       multu $s4, $t0      # i * 4
       mflo $t1            # Store the i * 4 to $t1
-      multu $s3, $t0      # (len - 1) * 4
-      mflo $t2            # Store (len - 1) * 4 to $t2
+      multu $s3, $t0      # pivot * 4
+      mflo $t2            # Store pivot * 4 to $t2
       add $a0, $s0, $t1   # Advance the pointer
       add $a1, $s0, $t2   # Advance the pointer
       
@@ -301,7 +306,7 @@ quick_sort:
   li $t0, 4             # Put constant in a register
   multu $s3, $t0        # pivot * 4
   mflo $s4
-  addi $s4, $s4, 4           # pivot + (1 * 4)
+  addi $s4, $s4, 4      # pivot + (1 * 4)
   add $a0, $a0, $s4     # a + (pivot + 1) * 4
   subu $a1, $s1, $s3    # len - pivot
   subu $a1, $a1, 1      # len - pivot - 1
