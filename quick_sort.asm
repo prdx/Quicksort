@@ -66,7 +66,7 @@
     close_bracket: .asciiz " ]\n"
 
     space: .asciiz " "
-    enter: .asciiz "\n"
+
 .text
 main:
   # printf("Initial array:\n")
