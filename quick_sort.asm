@@ -19,9 +19,9 @@
       #                 "Jessie", "Jess", "Janet", "Jane"};
         .align 5
       dataNames:
-        .asciiz "Joe" 
+        .asciiz "Jake" 
         .align 5
-        .asciiz "Jenny"
+        .asciiz "Jack"
         .align 5
         .asciiz "Jill"
         .align 5
@@ -29,35 +29,35 @@
         .align 5
         .asciiz "Jeff"
         .align 5
-        .asciiz "Joyce"
-        .align 5
-        .asciiz "Jerry"
-        .align 5
-        .asciiz "Janice"
-        .align 5
-        .asciiz "Jake"
-        .align 5
-        .asciiz "Jonna"
-        .align 5
-        .asciiz "Jack"
-        .align 5
-        .asciiz "Jocelyn"
-        .align 5
-        .asciiz "Jessie"
-        .align 5
-        .asciiz "Jess"
-        .align 5
-        .asciiz "Janet"
-        .align 5
-        .asciiz "Jane"
-        .align 5
+        #.asciiz "Joyce"
+        #.align 5
+        #.asciiz "Jerry"
+        #.align 5
+        #.asciiz "Janice"
+        #.align 5
+        #.asciiz "Jake"
+        #.align 5
+        #.asciiz "Jonna"
+        #.align 5
+        #.asciiz "Jack"
+        #.align 5
+        #.asciiz "Jocelyn"
+        #.align 5
+        #.asciiz "Jessie"
+        #.align 5
+        #.asciiz "Jess"
+        #.align 5
+        #.asciiz "Janet"
+        #.align 5
+        #.asciiz "Jane"
+        #.align 5
       
                    .align 2
       dataAddress: .space 64
 
         		
 	# int size = 16;
-	size: 		.word 16
+	size: 		.word 5
 
     initial_array:      .asciiz "Initial array:\n"
     sorted_array:       .asciiz "Sorted array:\n"
@@ -97,7 +97,7 @@ main:
   # Prepare for swap function test
   la $a0, dataAddress
   # addi $a0, $a0, 4
-  la    $a1, ($a0)
+  la    $a1, 4($a0)
   
   addi $sp, $sp, -4     # Use stack
     sw $ra, 0($sp)
@@ -164,9 +164,18 @@ str_lt:
 
   # for (; *x!='\0' && *y!='\0'; x++, y++) {
   compare_loop:
-    lb $t3, ($t0)
-    lb $t4, ($t1)       
+    lbu $t3, ($t0)
+    lbu $t4, ($t1) 
     
+    # DEBUG
+    #li    $v0, 11
+    #la    $a0, ($t3)
+    #syscall
+    
+    #li    $v0, 11
+    #la    $a0, ($t4)
+    #syscall
+        
     beq     $t3, $zero, end_compare_loop
     beq     $t4, $zero, end_compare_loop
        
@@ -239,7 +248,7 @@ quick_sort:
   subu $s5, $s1, 1      # len - 1
 
   quick_sort_loop:
-    bgt $s4, $s5, quick_sort_loop_end       # if i >= len - 1, end loop
+    bge $s4, $s5, quick_sort_loop_end       # if i >= len - 1, end loop
 
     # if (str_lt(a[i], a[len - 1])) {
     li $t0, 4
@@ -279,6 +288,9 @@ quick_sort:
       
       # pivot++;
       addi $s3, $s3, 1
+      
+      addi $s4, $s4, 1      # i++
+      j quick_sort_loop
       
   quick_sort_loop_end:
   # swap_str_ptrs(&a[pivot], &a[len - 1]);
