@@ -57,16 +57,16 @@
 
         		
 	# int size = 16;
-	size: 		.word 16
+	size: .word 16
 
-    initial_array:      .asciiz "Initial array:\n"
-    sorted_array:       .asciiz "Sorted array:\n"
+    initial_array: .asciiz "Initial array:\n"
+    sorted_array: .asciiz "Sorted array:\n"
 
-    open_bracket:       .asciiz "["
-    close_bracket:      .asciiz " ]\n"
+    open_bracket: .asciiz "["
+    close_bracket: .asciiz " ]\n"
 
-    space:      .asciiz " "
-    enter: 	.asciiz "\n"
+    space: .asciiz " "
+    enter: .asciiz "\n"
 .text
 main:
   # printf("Initial array:\n")
@@ -81,41 +81,21 @@ main:
   la $t3, size
   lw $t3, ($t3)
 
-
   build_address:
   beq $t2, $t3, end_build_address
   sw $t1, ($t0)
-  addi $t0, $t0, 4
-  addi $t1, $t1, 32
-  addi $t2, $t2, 1
+  addi $t0, $t0, 4      # Advance the pointer of the address array
+  addi $t1, $t1, 32     # Advance the pointer of the names array
+  addi $t2, $t2, 1      # Advance the counter
   
   j build_address
 
   end_build_address:
 
-  ## DEBUG 
-  # Prepare for swap function test
-  la $a0, dataAddress
-  # addi $a0, $a0, 4
-  la    $a1, 4($a0)
-  
-  addi $sp, $sp, -4     # Use stack
-    sw $ra, 0($sp)
-    jal str_lt 
-    lw $ra, 0($sp)
-    addi $sp, $sp, 4 
-  
-  # Test the swap fuction
-  # addi $sp, $sp, -4 # Use stack
-  # sw $ra, 0($sp)
-  # jal swap_str_ptrs
-  # lw $ra, 0($sp)
-  # addi $sp, $sp, 4 # Return stack
-
   # print_array(data, size);
-  la $a0, dataAddress
-  la    $a1, size
-  lw    $a1, 0($a1)
+  la $a0, dataAddress       # Load the data as parameter
+  la $a1, size              
+  lw $a1, 0($a1)
 
   addi $sp, $sp, -4 # Use stack
   sw $ra, 0($sp)
@@ -124,9 +104,9 @@ main:
   addi $sp, $sp, 4 # Return stack
 
   # quick_sort(data, size)
-  la $a0, dataAddress
-  la    $a1, size
-  lw    $a1, 0($a1)
+  la $a0, dataAddress       # Load the data as parameter
+  la $a1, size
+  lw $a1, 0($a1)
   
   addi $sp, $sp, -4 # Use stack
   sw $ra, 0($sp)
@@ -135,14 +115,14 @@ main:
   addi $sp, $sp, 4 # Return stack
 
   # printf("Sorted array:\n")
-  li    $v0, 4
-  la    $a0, sorted_array
+  li $v0, 4
+  la $a0, sorted_array
   syscall
   
   # print_array(data, size);
-  la $a0, dataAddress
-  la    $a1, size
-  lw    $a1, 0($a1)
+  la $a0, dataAddress       # Load the data as parameter
+  la $a1, size
+  lw $a1, 0($a1)
   
   addi $sp, $sp, -4 # Use stack
   sw $ra, 0($sp)
@@ -161,47 +141,21 @@ str_lt:
   lw $t0, ($a0) # Transfer the x from a0 to t0
   lw $t1, ($a1) # Transfer the y from a1 to t1
   
-  # DEBUG
-  #  li    $v0, 4
-  #  lw    $a0, ($a0)
-  #  syscall
-    
-  #  li    $v0, 4
-  #  la    $a0, space
-  #  syscall
-    
-  #  li    $v0, 4
-  #  lw    $a0, ($a1)
-  #  syscall
-    
-  #  li    $v0, 4
-  #  la    $a0, enter
-  #  syscall
-
   # for (; *x!='\0' && *y!='\0'; x++, y++) {
   compare_loop:
     lbu $t3, ($t0)
     lbu $t4, ($t1) 
     
-    # DEBUG
-    # li    $v0, 11
-    # la    $a0, ($t3)
-    # syscall
-    
-    # li    $v0, 11
-    # la    $a0, ($t4)
-    # syscall
-        
-    beq     $t3, $zero, end_compare_loop
-    beq     $t4, $zero, end_compare_loop
+    beq     $t3, $zero, end_compare_loop    # *x != '\0'
+    beq     $t4, $zero, end_compare_loop    # *y != '\0'
        
     # if ( *x < *y ) return 1
     blt     $t3, $t4, return_1
     # if ( *y < *x ) return 0
     blt     $t4, $t3, return_0
 
-    addi    $t0, $t0, 1     #x++ 
-    addi    $t1, $t1, 1     #y++
+    addi    $t0, $t0, 1     # x++ 
+    addi    $t1, $t1, 1     # y++
     
     j compare_loop
 
@@ -266,11 +220,11 @@ quick_sort:
   quick_sort_loop:
     bge $s4, $s5, quick_sort_loop_end       # if i >= len - 1, end loop
 
-    # if (str_lt(a[i], a[len - 1])) {
+    # if (str_lt(a[i], a[len - 1]))
     li $t0, 4
-    mult $s4, $t0      # i * 4
+    mult $s4, $t0       # i * 4
     mflo $t1            # Store the i * 4 to $t1
-    mult $s5, $t0      # (len - 1) * 4
+    mult $s5, $t0       # (len - 1) * 4
     mflo $t2            # Store (len - 1) * 4 to $t2
     add $a0, $s0, $t1   # Advance the pointer
     add $a1, $s0, $t2   # Advance the pointer
@@ -311,10 +265,10 @@ quick_sort:
   quick_sort_loop_end:
   # swap_str_ptrs(&a[pivot], &a[len - 1]);
   li $t0, 4             # Put constant in a register
-  mult $s3, $t0        # Multiple pivot * 4
+  mult $s3, $t0         # Multiple pivot * 4
   mflo $s4              # Store pivot * 4 in t1
-  sub $s5, $s1, 1      # len - 1 
-  mult $s5, $t0        # Multiple len - 1 * 4
+  sub $s5, $s1, 1       # len - 1 
+  mult $s5, $t0         # Multiple len - 1 * 4
   mflo $s5              # Store (len - 1) * 4 in t2
   add $a0, $s0, $s4     # Advance the pointer of s0 + pivot * 4
   add $a1, $s0, $s5     # Advance the pointer of s0 + (len - 1) * 4
@@ -332,12 +286,12 @@ quick_sort:
 
   # quick_sort(a + pivot + 1, len - pivot - 1);
   li $t0, 4             # Put constant in a register
-  mult $s3, $t0        # pivot * 4
+  mult $s3, $t0         # pivot * 4
   mflo $s4
   addi $s4, $s4, 4      # pivot + (1 * 4)
   add $a0, $s0, $s4     # a + (pivot + 1) * 4
-  sub $a1, $s1, $s3    # len - pivot
-  sub $a1, $a1, 1      # len - pivot - 1
+  sub $a1, $s1, $s3     # len - pivot
+  sub $a1, $a1, 1       # len - pivot - 1
   
   jal quick_sort 
   
